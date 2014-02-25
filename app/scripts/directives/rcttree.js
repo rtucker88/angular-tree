@@ -14,25 +14,45 @@ angular.module('angularTreeApp')
             replace: 'true',
             controller: ['$scope', function ($scope) {
                 this.currentLevel = 1;
-                this.currentlySelectedNode = null;
+                this.selectedNode = null;
+
+                /**
+                 * Sets the node and its parents as selected according to flag
+                 * @param node the node
+                 * @param flag the flag to set as selected
+                 */
+                var setSelected = function(node, flag) {
+                    var current = node;
+                    while(current) {
+                        if(!current) {
+                            return;
+                        }
+                        current.selected = flag;
+                        current = current.parent;
+                    }
+                };
 
                 // Bubble up the call for onSelect
                 this.onSelect = function (node) {
+                    // Unset current node and its parents
+                    setSelected(this.selectedNode, false);
+                    setSelected(node, true);
+                    console.log('got node in onSelect tree', node);
                     $scope.onTreeSelect({node: node});
-                    this.currentlySelectedNode = node;
+                    this.selectedNode = node;
                 };
             }],
-            link: function postLink(scope) {
+            link: function postLink(scope, elem, attrs, treeCtrl) {
                 // Watch the tree data for changes
                 scope.$watch('treeData', function (newVal) {
                     console.log('watching tree data?');
                     // Rebuild the tree
                     var tree = new Tree();
                     var root = tree.getRoot();
-                    addNodes(root, newVal);
+                    addNodes(root, newVal, 1);
                     scope.tree = tree.getRoot();
                     console.log(scope.tree);
-                }, true);
+                });
 
                 scope.tree = null;
 
@@ -46,6 +66,7 @@ angular.module('angularTreeApp')
                      * @type {TreeNode}
                      */
                     var root = new TreeNode(null, null);
+                    root.expanded = true;
 
                     /**
                      * Gets the root of the tree
@@ -65,13 +86,13 @@ angular.module('angularTreeApp')
                  * @param label the label to show
                  * @constructor the tree node constructor
                  */
-                function TreeNode(parent, data, label) {
+                function TreeNode(parent, data, label, id) {
                     var self = this;
                     this.children = [];
                     this.parent = parent || null;
                     this.data = data || null;
                     this.label = label || null;
-                    this.id = guid();
+                    this.id = id || guid();
                     this.level = 0;
 
                     if (this.parent) {
@@ -83,8 +104,8 @@ angular.module('angularTreeApp')
                      * @param data the data to be associated with the node
                      * @returns {*} the newly added node
                      */
-                    this.addChild = function (data, label) {
-                        var newNode = new TreeNode(self, data, label);
+                    this.addChild = function (data, label, id) {
+                        var newNode = new TreeNode(self, data, label, id);
                         self.children.push(newNode);
                         return newNode;
                     };
@@ -99,7 +120,7 @@ angular.module('angularTreeApp')
                             var children = parent.children;
                             for (var i = 0; i < children; i++) {
                                 if (children[i].id === self.id) {
-                                    children.splice(i, 1);
+                                    delete children.splice(i, 1)[0];
                                 }
                             }
                         }
@@ -135,14 +156,25 @@ angular.module('angularTreeApp')
                  * @param parent the parent node to add to
                  * @param children the children array to add to this node
                  */
-                function addNodes(parent, children) {
+                function addNodes(parent, children, maxLevel, currentLevel) {
+                    if(!currentLevel) {
+                        currentLevel = 0;
+                    }
                     if (!children) {
                         return;
                     }
                     for (var i = 0; i < children.length; i++) {
-                        var childNode = parent.addChild(children[i].data, children[i].label);
+                        var childNode = parent.addChild(children[i].data, children[i].label, children[i].id);
+                        if(parent.expanded) {
+                            childNode.shown = true;
+                        }
+                        if(currentLevel < maxLevel) {
+                            if(children[i].children) {
+                                childNode.expanded = true;
+                            }
+                        }
                         if (children[i].children) {
-                            addNodes(childNode, children[i].children);
+                            addNodes(childNode, children[i].children, maxLevel, currentLevel + 1);
                         }
                     }
                 }
