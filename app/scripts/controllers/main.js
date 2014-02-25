@@ -1,6 +1,8 @@
 'use strict';
 
 angular.module('angularTreeApp').controller('MainCtrl', function ($scope) {
+        $scope.selectedNode = null;
+
         $scope.treeData = [
             {children: [
                 {children: [
@@ -29,8 +31,18 @@ angular.module('angularTreeApp').controller('MainCtrl', function ($scope) {
 
         $scope.onSelect = function (entry) {
             console.log('got entry', entry);
+            $scope.selectedNode = entry;
         };
 
+        $scope.deleteNode = function(entry) {
+            console.log('deleting node', entry);
+            entry.removeNode();
+        };
+
+        $scope.addNode = function(entry) {
+            console.log('adding node', entry);
+            $scope.selectedNode.addChild({}, entry.label);
+        };
 
         $scope.awesomeThings = [
             'HTML5 Boilerplate', 'AngularJS', 'Karma'

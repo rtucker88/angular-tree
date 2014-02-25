@@ -114,13 +114,16 @@ angular.module('angularTreeApp')
                      * Removes this node from the tree
                      */
                     this.removeNode = function () {
+                        console.log('removing node');
                         // Break the parent's reference
                         var parent = self.parent;
                         if (parent) {
                             var children = parent.children;
                             for (var i = 0; i < children; i++) {
                                 if (children[i].id === self.id) {
+                                    console.log('children before', children);
                                     delete children.splice(i, 1)[0];
+                                    console.log('children after', children);
                                 }
                             }
                         }
@@ -129,6 +132,9 @@ angular.module('angularTreeApp')
                         delete self.parent;
                         delete self.id;
                         delete self.data;
+
+                        // Remove the actual element
+                        self.elem.remove();
                     };
                 }
 
