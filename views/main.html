@@ -1,0 +1,1 @@
+<rct-tree tree-data="treeData" on-tree-select="onSelect(node)"></rct-tree><h3>Selected node is: {{ selectedNode.label }}</h3><button class="btn btn-default" ng-click="deleteNode(selectedNode)">Delete Node</button><form ng-submit="addNode(nodeModel)"><input type="text" ng-model="nodeModel.label"><button type="submit">Add node</button></form>
