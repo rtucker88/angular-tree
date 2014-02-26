@@ -6,7 +6,8 @@ angular.module('angularTreeApp')
             scope: {
                 treeData: '=',
                 currentlySelected: '=',
-                onTreeSelect: '&'
+                onTreeSelect: '&',
+                treeDefaultLevel: '@'
             },
             template: '<ul class="list-unstyled"><rct-node ng-repeat="node in tree.children" node="node"></rct-node>' +
                 '</ul>',
@@ -56,6 +57,16 @@ angular.module('angularTreeApp')
 
                 scope.tree = null;
 
+                scope.$on('nodeRemoved', function(event, node) {
+                    node.elem.remove();
+                });
+
+                scope.$on('nodeAdded', function(event, node) {
+                    console.log('node added event catcher');
+                    node.parent.expanded = true;
+                    node.shown = true;
+                });
+
                 /**
                  * Tree Constructor
                  * @constructor
@@ -104,14 +115,20 @@ angular.module('angularTreeApp')
                      * @param data the data to be associated with the node
                      * @returns {*} the newly added node
                      */
-                    this.addChild = function (data, label, id) {
+                    this.addChild = function (data, label, id, shouldNotBroadcast) {
                         var newNode = new TreeNode(self, data, label, id);
                         self.children.push(newNode);
+
+                        if(!shouldNotBroadcast) {
+                            scope.$broadcast('nodeAdded', newNode);
+                        }
+
                         return newNode;
                     };
 
                     /**
                      * Removes this node from the tree
+                     * @returns {*} the deleted tree node
                      */
                     this.removeNode = function () {
                         console.log('removing node');
@@ -133,8 +150,9 @@ angular.module('angularTreeApp')
                         delete self.id;
                         delete self.data;
 
-                        // Remove the actual element
-                        self.elem.remove();
+                        scope.$broadcast('nodeRemoved', self);
+
+                        return self;
                     };
                 }
 
@@ -162,7 +180,8 @@ angular.module('angularTreeApp')
                  * @param parent the parent node to add to
                  * @param children the children array to add to this node
                  */
-                function addNodes(parent, children, maxLevel, currentLevel) {
+                function addNodes(parent, children, currentLevel) {
+                    var maxTreeLevel = scope.treeDefaultLevel || 2;
                     if(!currentLevel) {
                         currentLevel = 0;
                     }
@@ -170,17 +189,17 @@ angular.module('angularTreeApp')
                         return;
                     }
                     for (var i = 0; i < children.length; i++) {
-                        var childNode = parent.addChild(children[i].data, children[i].label, children[i].id);
+                        var childNode = parent.addChild(children[i].data, children[i].label, children[i].id, true);
                         if(parent.expanded) {
                             childNode.shown = true;
                         }
-                        if(currentLevel < maxLevel) {
+                        if(currentLevel < maxTreeLevel) {
                             if(children[i].children) {
                                 childNode.expanded = true;
                             }
                         }
                         if (children[i].children) {
-                            addNodes(childNode, children[i].children, maxLevel, currentLevel + 1);
+                            addNodes(childNode, children[i].children, currentLevel + 1);
                         }
                     }
                 }

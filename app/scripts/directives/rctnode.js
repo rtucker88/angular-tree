@@ -72,6 +72,9 @@ angular.module('angularTreeApp').directive('rctNode', function ($compile) {
                 '</ul>')(scope, function (cloned) {
                 scope.node.elem = cloned;
                 elem.append(cloned);
+                elem.on('$destroy', function() {
+                    scope.node.removeNode();
+                });
             });
         }
     };
