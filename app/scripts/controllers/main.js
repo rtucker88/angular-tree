@@ -29,6 +29,8 @@ angular.module('angularTreeApp').controller('MainCtrl', function ($scope) {
                 data:  'test3'}
         ];
 
+        console.log($scope.treeData);
+
         $scope.onSelect = function (entry) {
             $scope.selectedNode = entry;
         };

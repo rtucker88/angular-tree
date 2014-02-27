@@ -5,7 +5,7 @@ angular.module('angularTreeApp').directive('rctNode', function ($compile) {
         scope:    {
             node: '='
         },
-        template: '<li ng-show="isNodeShown(node)" ng-style="getMargin(node)"></li>',
+        template: '<ul ng-show="isNodeShown(node)" ng-style="getMargin(node)" class="list-unstyled"></ul>',
         restrict: 'EA',
         replace:  true,
         require:  '^rctTree',
@@ -66,10 +66,13 @@ angular.module('angularTreeApp').directive('rctNode', function ($compile) {
                 return {'margin-left': count * 15 + 'px'};
             };
 
-            $compile('<li ng-show="isNodeShown(node)"><span class="glyphicon glyphicon-plus" ng-click="expandNode(node)" ng-show="node.children.length"></span>' +
-                '<span ng-click="nodeSelect(node)">{{node.label}}</span></li><ul class="list-unstyled">' +
-                '<rct-node ng-repeat="node in node.children" node="node"></rct-node>' +
-                '</ul>')(scope, function (cloned) {
+            scope.hasChildren = function(node) {
+                return node.children && node.children.length;
+            };
+
+            $compile('<li ng-show="isNodeShown(node)"><span class="glyphicon glyphicon-plus" ng-click="expandNode(node)" ng-show="hasChildren(node)"></span>' +
+                '<span ng-click="nodeSelect(node)">{{node.label}}</span></li>' +
+                '<li ng-show="hasChildren(node)"><rct-node ng-repeat="node in node.children track by $id(node)" node="node"></rct-node></li>')(scope, function (cloned) {
                 scope.node.elem = cloned;
                 elem.append(cloned);
                 elem.on('$destroy', function() {
