@@ -35,7 +35,6 @@ angular.module('angularTreeApp').directive('rctTree', function () {
                     // Unset current node and its parents
                     setSelected(this.selectedNode, false);
                     setSelected(node, true);
-                    console.log('got node in onSelect tree', node);
                     $scope.onTreeSelect({node: node});
                     this.selectedNode = node;
                 };
@@ -46,7 +45,6 @@ angular.module('angularTreeApp').directive('rctTree', function () {
                 });
 
                 $scope.$on('nodeAdded', function (event, node) {
-                    console.log('node added event catcher');
                     node.parent.expanded = true;
                     node.shown = true;
                 });
@@ -56,7 +54,6 @@ angular.module('angularTreeApp').directive('rctTree', function () {
 
                 // Watch the tree data for changes
                 scope.$watch('treeData', function (newVal) {
-                    console.log('watching tree data?');
                     // Build the tree if needed
                     if (!tree) {
                         tree = new Tree();
@@ -137,16 +134,13 @@ angular.module('angularTreeApp').directive('rctTree', function () {
                      * @returns {*} the deleted tree node
                      */
                     this.removeNode = function () {
-                        console.log('removing node');
                         // Break the parent's reference
                         var parent = self.parent;
                         if (parent) {
                             var children = parent.children;
                             for (var i = 0; i < children; i++) {
                                 if (children[i].id === self.id) {
-                                    console.log('children before', children);
                                     delete children.splice(i, 1)[0];
-                                    console.log('children after', children);
                                 }
                             }
                         }
@@ -199,8 +193,6 @@ angular.module('angularTreeApp').directive('rctTree', function () {
                         
                         var foundChild = null;
                         for (var j = 0; j < parent.children.length; j++) {
-                            console.log('parent id', parent.children[j].id,
-                                'our id', currentChild.id);
                             if (parent.children[j].id === currentChild.id) {
                                 foundChild = parent.children[j];
                                 break;
