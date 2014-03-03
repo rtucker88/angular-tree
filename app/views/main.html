@@ -1,5 +1,7 @@
 <rct-tree tree-data="treeData" on-tree-select="onSelect(node)"
-          tree-default-level="2"></rct-tree>
+          tree-default-level="4"
+          tree-list-style="list-unstyled"
+          tree-margin="15"></rct-tree>
 <h3>Selected node is: {{ selectedNode.label }}</h3>
 <button class="btn btn-default"
         ng-click="deleteNode(selectedNode)">Delete Node
